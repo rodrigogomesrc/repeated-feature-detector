@@ -78,13 +78,19 @@ def save_image(image, folder, image_name):
 
 def create_collages(quantity, images_path, grid_size, resolution):
     images_path_list = get_images_file_paths(images_path)
+    qtd_in_folder = get_image_quantity_on_destination_folder("generated-dataset/non-matching")
     for i in range(quantity):
         print("Creating collages {}/{}".format(i + 1, quantity))
         non_matching_image = create_non_matching_images(images_path_list, grid_size * grid_size, grid_size, resolution)
         matching_image = create_matching_images(images_path_list, grid_size * grid_size, grid_size, resolution)
-        save_image(non_matching_image, "generated-dataset/non-matching", "non-matching-{}.jpg".format(i))
-        save_image(matching_image, "generated-dataset/matching", "matching-{}.jpg".format(i))
+        save_image(non_matching_image, "generated-dataset/non-matching", "non-matching-{}.jpg".format(qtd_in_folder + i + 1))
+        save_image(matching_image, "generated-dataset/matching", "matching-{}.jpg".format(qtd_in_folder + i + 1))
       
+
+def get_image_quantity_on_destination_folder(path):
+    if not os.path.exists(path):
+        return 0
+    return len(os.listdir(path))
 
 
 if __name__ == "__main__":
