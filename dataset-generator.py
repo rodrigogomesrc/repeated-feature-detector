@@ -28,7 +28,7 @@ def create_matching_images(images_path, quantity, grid_size, resolution):
 
 def get_random_indices_with_one_repetition(quantity, max_value):
     random_indices = get_n_random_indices(quantity -1, max_value, repeat=True)
-    repeated_indice = random.randint(0, quantity -1)
+    repeated_indice = random.randint(0, len(random_indices) - 1)
     repeated_number = random_indices[repeated_indice]
     random_indices.append(repeated_number)
     return random_indices
@@ -55,9 +55,9 @@ def get_black_image(resolution):
 
 def get_n_random_indices(quantity, max_value, repeat=False):
     if repeat:
-        return [random.randint(0, max_value) for _ in range(quantity)]
+        return [random.randint(0, max_value -1) for _ in range(quantity)]
     else:
-        return random.sample(range(max_value), quantity)
+        return random.sample(range(max_value -1), quantity)
     
 
 def get_resized_image(path, resolution):
@@ -79,6 +79,7 @@ def save_image(image, folder, image_name):
 def create_collages(quantity, images_path, grid_size, resolution):
     images_path_list = get_images_file_paths(images_path)
     for i in range(quantity):
+        print("Creating collages {}/{}".format(i + 1, quantity))
         non_matching_image = create_non_matching_images(images_path_list, grid_size * grid_size, grid_size, resolution)
         matching_image = create_matching_images(images_path_list, grid_size * grid_size, grid_size, resolution)
         save_image(non_matching_image, "generated-dataset/non-matching", "non-matching-{}.jpg".format(i))
