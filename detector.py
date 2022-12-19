@@ -4,45 +4,33 @@ import sys
 
 
 def divide_images_into_sections(image, n_sections):
-    print(image.shape)
     height, width, _ = image.shape
-    section_height = height // n_sections
-    section_width = width // n_sections
+    height_section = height // n_sections
+    width_section = width // n_sections
     sections = []
     for i in range(n_sections):
         for j in range(n_sections):
-            section = image[i * section_height:(i + 1) * section_height, j * section_width:(j + 1) * section_width, :]
-            sections.append(section)
-
+            sections.append(image[i * height_section: (i + 1) * height_section, j * width_section: (j + 1) * width_section, :])
     return sections
 
 
-def get_image_features(image):
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    image = cv2.resize(image, (8, 8))
-    image = np.float32(image)
-    image = cv2.dct(image)
-    image = image[:4, :4]
-    image = image.flatten()
-    image = image / np.sum(image)
-    return image
+def match_template(image, template):
+    
+    bw_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    bw_template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
+    result = cv2.matchTemplate(bw_image, bw_template, cv2.TM_SQDIFF_NORMED)
+    min_val,_,_,_ = cv2.minMaxLoc(result)
+    return min_val
+    
 
-
-def does_template_match(image, template):
-    image_features = get_image_features(image)
-    template_features = get_image_features(template)
-    distance = np.linalg.norm(image_features - template_features)
-    return distance < 0.1
-
-
-def has_repeated_patterns(image):
-    sections = divide_images_into_sections(image, 4)
+def has_repeated_patterns(image, n_sections=4):
+    sections = divide_images_into_sections(image, n_sections)
+    matches = []
     for i in range(len(sections)):
         for j in range(i + 1, len(sections)):
-            if does_template_match(sections[i], sections[j]):
-                return True
+            matches.append(match_template(sections[i], sections[j]))
 
-    return False
+    return min(matches) < 0.1
 
 
 if __name__ == "__main__":
@@ -54,8 +42,12 @@ if __name__ == "__main__":
     sections = int(sys.argv[2])
     image = cv2.imread(image_path)
 
-    if has_repeated_patterns(image):
-        print("The image contains repeated patterns.")
+    if image is None:
+        print("Invalid image path.")
+        sys.exit(1)
+
+    if has_repeated_patterns(image, sections):
+        print("Existe padrão repetido")
 
     else:
-        print("The image does not contain repeated patterns.")
+        print("Não existe padrão repetido")
