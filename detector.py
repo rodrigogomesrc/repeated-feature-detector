@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import sys
+import math
 
 
 def divide_images_into_sections(image, n_sections):
@@ -23,30 +24,34 @@ def match_template(image, template):
     return min_val
     
 
-def has_repeated_patterns(image, n_sections=4):
-    sections = divide_images_into_sections(image, n_sections)
+def has_repeated_patterns(image):
+
     matches = []
-    for i in range(len(sections)):
-        for j in range(i + 1, len(sections)):
-            matches.append(match_template(sections[i], sections[j]))
+    for s in range (3, 10):
+        sections = divide_images_into_sections(image, s)
+        size_match = []
+        for i in range(len(sections)):
+            for j in range(i + 1, len(sections)):
+                match_value = match_template(sections[i], sections[j])
+                size_match.append(match_value * 100000)
+        matches.append(min(size_match))
 
     return min(matches) < 0.1
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Usage: python3 detector.py <image_path> <number_of_sections>")
+    if len(sys.argv) != 2:
+        print("Usage: python3 detector.py <image_path>")
         sys.exit(1)
 
     image_path = sys.argv[1]
-    sections = int(sys.argv[2])
     image = cv2.imread(image_path)
 
     if image is None:
         print("Invalid image path.")
         sys.exit(1)
 
-    if has_repeated_patterns(image, sections):
+    if has_repeated_patterns(image):
         print("Existe padrão repetido")
 
     else:
